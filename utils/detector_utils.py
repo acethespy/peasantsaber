@@ -61,7 +61,7 @@ def draw_box_on_image(num_hands_detect, score_thresh, scores, boxes, im_width, i
             p2 = (int(right), int(bottom))
             cv2.rectangle(image_np, p1, p2, (255, 255, 255), 3, 1)
             # Left top corner, right bottom corner
-            print("Testing: " + str(left) + "," + str(top) + " " + str(right) + "," + str(bottom))
+            # print("Testing: " + str(left) + "," + str(top) + " " + str(right) + "," + str(bottom))
             if ((right - left) * (bottom - top) > maxSize):
                 maxSize = (right - left) * (bottom - top)
                 result = ((int)((left + right)/2) ,(int)((top + bottom)/2))
