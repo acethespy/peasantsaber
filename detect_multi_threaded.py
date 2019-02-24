@@ -152,7 +152,7 @@ if __name__ == '__main__':
 
         if (output_frame is not None):
             detector_utils.draw_base_lines_on_image((int)(cap_params["im_width"]), (int)(cap_params["im_height"]), output_frame)
-            detector_utils.draw_music_bars_on_image(output_frame, music_bars)
+            detector_utils.draw_music_bars_on_image(music_bars, output_frame)
             if (args.display > 0):
                 if (args.fps > 0):
                     detector_utils.draw_fps_on_image("FPS : " + str(int(fps)),
