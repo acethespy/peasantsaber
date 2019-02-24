@@ -39,7 +39,7 @@ class CircleManager(object):
 
     def createDefaultCircle(self, width, height):
         initialXs = [width // 8, 3 * width // 8, 5 * width // 8, 7 * width // 8]
-        self.centers.append(((int)(initialXs[random.randint(0, len(initialXs) - 1)]), (int)(height)))
+        self.centers.append(((int)(initialXs[random.randint(0, len(initialXs) - 1)]), (int)(height / 2)))
         self.radii.append(30)
         self.colors.append((0, 0, 0))
 
@@ -55,7 +55,7 @@ class CircleManager(object):
     def moveCircles(self):
         for i in range(len(self.centers)):
             loc = self.centers[i]
-            self.centers[i] = (loc[0], loc[1] - self.speed * (datetime.now() - self.lastTime).total_seconds())
+            self.centers[i] = (loc[0], loc[1] + self.speed * (datetime.now() - self.lastTime).total_seconds())
         for i in range(len(self.explodeCenters)):
             self.explodeRadii[i] += self.explodeFactor * (datetime.now() - self.lastTime).total_seconds()
         for i in range(len(self.failCenters)):
@@ -66,7 +66,7 @@ class CircleManager(object):
         #removeThese = []
         for i in range(lenn):
             loc = self.centers[lenn - 1 - i]
-            if (loc[1] < height*2/3 - self.margin):
+            if (loc[1] > height*2/3 + self.margin):
                 self.failCenters.append(self.centers.pop(lenn - 1 - i))
                 self.failRadii.append(self.radii.pop(lenn - 1 - i))
                 self.colors.pop(lenn - 1 - i)
@@ -89,7 +89,7 @@ class CircleManager(object):
             self.centers.pop(i)
             self.radii.pop(i)
             self.colors.pop(i)"""
-        
+
 
     def hit(self, x, height, width):
         d = None;
