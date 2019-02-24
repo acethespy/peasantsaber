@@ -20,7 +20,12 @@ class CircleManager(object):
         self.explodeRadii = []
         self.explodeColors = []
         self.explodeFactor = 50
-        self.explodeMax = 45;
+        self.explodeMax = 45
+        self.failCenters = []
+        self.failRadii = []
+        self.failColors = []
+        self.failFactor = 50
+        self.failMin = 15
         self.score = 0
 
 
@@ -43,6 +48,9 @@ class CircleManager(object):
             self.cv2.circle(image_np, ((int)(self.centers[i][0]), (int)(self.centers[i][1])), (int)(self.radii[i]), self.colors[i], thickness=-1)
         for i in range(len(self.explodeCenters)):
             self.cv2.circle(image_np, ((int)(self.explodeCenters[i][0]), (int)(self.explodeCenters[i][1])), (int)(self.explodeRadii[i]), self.explodeColors[i], thickness=-1)
+        for i in range(len(self.failCenters)):
+            self.cv2.circle(image_np, ((int)(self.failCenters[i][0]), (int)(self.failCenters[i][1])), (int)(self.failRadii[i]), self.failColors[i], thickness=-1)
+        self.cv2.putText(image_np, "Score: " + str(self.score), (20, 50), self.cv2.FONT_HERSHEY_SIMPLEX, 0.75, (255, 255, 255), 2)
 
     def moveCircles(self):
         for i in range(len(self.centers)):
@@ -50,6 +58,8 @@ class CircleManager(object):
             self.centers[i] = (loc[0], loc[1] - self.speed * (datetime.now() - self.lastTime).total_seconds())
         for i in range(len(self.explodeCenters)):
             self.explodeRadii[i] += self.explodeFactor * (datetime.now() - self.lastTime).total_seconds()
+        for i in range(len(self.failCenters)):
+            self.failRadii[i] = max(0, self.failRadii[i] - self.failFactor * (datetime.now() - self.lastTime).total_seconds())
 
     def checkFailed(self, height):
         lenn = len(self.centers)
@@ -57,15 +67,23 @@ class CircleManager(object):
         for i in range(lenn):
             loc = self.centers[lenn - 1 - i]
             if (loc[1] < height*2/3 - self.margin):
-                self.centers.pop(lenn - 1 - i)
-                self.radii.pop(lenn - 1 - i)
+                self.failCenters.append(self.centers.pop(lenn - 1 - i))
+                self.failRadii.append(self.radii.pop(lenn - 1 - i))
                 self.colors.pop(lenn - 1 - i)
+                self.failColors.append((0, 0, 255))
+                self.score = max(0, self.score - 10);
         lenn = len(self.explodeRadii)
         for i in range(lenn):
             if (self.explodeRadii[lenn - 1 - i] >= self.explodeMax):
                 self.explodeCenters.pop(lenn - 1 - i)
                 self.explodeRadii.pop(lenn - 1 - i)
                 self.explodeColors.pop(lenn - 1 - i)
+        lenn = len(self.failRadii)
+        for i in range(lenn):
+            if (self.failRadii[lenn - 1 - i] <= self.failMin):
+                self.failCenters.pop(lenn - 1 - i)
+                self.failRadii.pop(lenn - 1 - i)
+                self.failColors.pop(lenn - 1 - i)
                 #removeThese.append(lenn - 1 - i)
         """for i in removeThese:
             self.centers.pop(i)
@@ -86,7 +104,7 @@ class CircleManager(object):
             self.explodeRadii.append(self.radii.pop(d))
             self.colors.pop(d)
             self.explodeColors.append((0, 255, 0))
-            print("PERFECT")
+            self.score += 20;
 
     def update(self, width, height, image_np, points):
         # XXX: randomize or use file
