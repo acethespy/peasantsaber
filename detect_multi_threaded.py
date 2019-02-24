@@ -245,7 +245,7 @@ if __name__ == '__main__':
                 if (args.fps > 0):
                     detector_utils.draw_fps_on_image("FPS : " + str(int(fps)),
                                                      output_frame)
-                cv2.imshow('Multi-Threaded Detection', output_frame)
+                cv2.imshow('PeasantSaber', output_frame)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
             else:

@@ -5,7 +5,7 @@ class CircleManager(object):
 
 
     def __init__(self, cv2):
-        print("INITITITITITITI")
+        print("START")
         self.cv2 = cv2
         self.centers = []
         self.radii = []
@@ -40,10 +40,10 @@ class CircleManager(object):
     def createDefaultCircle(self, width, height):
         initialXs = [width // 8, 3 * width // 8, 5 * width // 8, 7 * width // 8]
         self.centers.append(((int)(initialXs[random.randint(0, len(initialXs) - 1)]), (int)(height / 2)))
-        self.radii.append(30)
+        self.radii.append(5)
         self.colors.append((0, 0, 0))
 
-    def drawCircles(self, image_np):
+    def drawCircles(self, height, image_np):
         for i in range(len(self.centers)):
             self.cv2.circle(image_np, ((int)(self.centers[i][0]), (int)(self.centers[i][1])), (int)(self.radii[i]), self.colors[i], thickness=-1)
         for i in range(len(self.explodeCenters)):
@@ -56,6 +56,10 @@ class CircleManager(object):
         for i in range(len(self.centers)):
             loc = self.centers[i]
             self.centers[i] = (loc[0], loc[1] + self.speed * (datetime.now() - self.lastTime).total_seconds())
+
+            # expand radii
+            if (self.radii[i] + 2 * (datetime.now() - self.start_time).total_seconds() < 45):
+                self.radii[i] += 2 * (datetime.now() - self.start_time).total_seconds()
         for i in range(len(self.explodeCenters)):
             self.explodeRadii[i] += self.explodeFactor * (datetime.now() - self.lastTime).total_seconds()
         for i in range(len(self.failCenters)):
@@ -66,7 +70,8 @@ class CircleManager(object):
         #removeThese = []
         for i in range(lenn):
             loc = self.centers[lenn - 1 - i]
-            if (loc[1] > height*2/3 + self.margin):
+            if (loc[1] > height * 2/3 + self.margin):
+                # print((datetime.now() - self.start_time).total_seconds())
                 self.failCenters.append(self.centers.pop(lenn - 1 - i))
                 self.failRadii.append(self.radii.pop(lenn - 1 - i))
                 self.colors.pop(lenn - 1 - i)
@@ -120,5 +125,5 @@ class CircleManager(object):
             self.hit(points[0][0], height, width)
         self.checkFailed(height)
         self.moveCircles()
-        self.drawCircles(image_np)
+        self.drawCircles(height, image_np)
         self.lastTime = datetime.now()

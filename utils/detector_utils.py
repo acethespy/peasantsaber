@@ -76,16 +76,16 @@ def draw_fps_on_image(fps, image_np):
 # Practice line
 def draw_base_lines_on_image(x, y, image_np):
     # Horizontal line
-    color = (0, 0, 0)
+    color = (255, 255, 255)
     initialX = (int)(x / 4)
     thirdOfY = (int)(2 * y / 3)
 
-    cv2.line(image_np, (0, thirdOfY), (x, thirdOfY), color, 5)
+    cv2.line(image_np, (0, thirdOfY), (x, thirdOfY), color, 3)
 
     # Vertical lines
-    cv2.line(image_np, (initialX, thirdOfY), (initialX, y), color, 5)
-    cv2.line(image_np, (initialX * 2, thirdOfY), (initialX * 2, y), color, 5)
-    cv2.line(image_np, (initialX * 3, thirdOfY), (initialX * 3, y), color, 5)
+    cv2.line(image_np, (initialX, thirdOfY), (initialX, y), color, 3)
+    cv2.line(image_np, (initialX * 2, thirdOfY), (initialX * 2, y), color, 3)
+    cv2.line(image_np, (initialX * 3, thirdOfY), (initialX * 3, y), color, 3)
 
 # Actual detection .. generate scores and bounding boxes given an image
 def detect_objects(image_np, detection_graph, sess):
