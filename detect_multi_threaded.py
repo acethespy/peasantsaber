@@ -15,7 +15,7 @@ score_thresh = 0.2
 point = None;
 
 def aboveThreshhold(pointA, height):
-    return pointA[1] < height*3/4;
+    return pointA[1] < height*2/3;
 
 # Create a worker thread that loads graph and
 # does detection on images in an input queue and puts it on an output queue
@@ -166,7 +166,7 @@ if __name__ == '__main__':
 
         if (output_frame is not None):
             detector_utils.draw_base_lines_on_image((int)(cap_params["im_width"]), (int)(cap_params["im_height"]), output_frame)
-            manager.drawCircles(output_frame)
+            manager.update((int)(cap_params["im_width"]), (int)(cap_params["im_height"]), output_frame)
 
             if (args.display > 0):
                 if (args.fps > 0):

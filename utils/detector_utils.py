@@ -77,7 +77,7 @@ def draw_base_lines_on_image(x, y, image_np):
     # Horizontal line
     color = (0, 0, 0)
     initialX = (int)(x / 4)
-    thirdOfY = (int)(3 * y / 4)
+    thirdOfY = (int)(2 * y / 3)
 
     cv2.line(image_np, (0, thirdOfY), (x, thirdOfY), color, 5)
 
