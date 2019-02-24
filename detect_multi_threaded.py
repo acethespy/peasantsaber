@@ -5,17 +5,16 @@ import multiprocessing
 from multiprocessing import Queue, Pool
 import time
 from utils.detector_utils import WebcamVideoStream
-import datetime
+from datetime import datetime
 import argparse
 
 frame_processed = 0
 score_thresh = 0.2
 
+boxes = []
+
 # Create a worker thread that loads graph and
 # does detection on images in an input queue and puts it on an output queue
-
-# Create array of
-music_bars = []
 
 def worker(input_q, output_q, cap_params, frame_processed):
     print(">> loading frozen model for worker")
@@ -125,7 +124,9 @@ if __name__ == '__main__':
     pool = Pool(args.num_workers, worker,
                 (input_q, output_q, cap_params, frame_processed))
 
-    start_time = datetime.datetime.now()
+    start_time = datetime.now()
+    manager = CircleManager()
+    manager.createDefaultCircle(cap_params['im_width'])
     num_frames = 0
     fps = 0
     index = 0
@@ -142,17 +143,16 @@ if __name__ == '__main__':
 
         output_frame = cv2.cvtColor(output_frame, cv2.COLOR_RGB2BGR)
 
-        elapsed_time = (datetime.datetime.now() - start_time).total_seconds()
+        elapsed_time = (datetime.now() - start_time).total_seconds()
         num_frames += 1
         fps = num_frames / elapsed_time
         # print("frame ",  index, num_frames, elapsed_time, fps)
 
-        # Create music_bars with values [(center), (color)]
-        music_bars.append([(cap_params['im_width'] / 8, cap_params['im_height'] - 50), (255, 255, 255)])
-
         if (output_frame is not None):
             detector_utils.draw_base_lines_on_image((int)(cap_params["im_width"]), (int)(cap_params["im_height"]), output_frame)
             detector_utils.draw_music_bars_on_image(music_bars, output_frame)
+            manager.drawCircles(output_frame)
+
             if (args.display > 0):
                 if (args.fps > 0):
                     detector_utils.draw_fps_on_image("FPS : " + str(int(fps)),
@@ -163,14 +163,14 @@ if __name__ == '__main__':
             else:
                 if (num_frames == 400):
                     num_frames = 0
-                    start_time = datetime.datetime.now()
+                    start_time = datetime.now()
                 else:
                     print("frames processed: ", index, "elapsed time: ",
                           elapsed_time, "fps: ", str(int(fps)))
         else:
             # print("video end")
             break
-    elapsed_time = (datetime.datetime.now() - start_time).total_seconds()
+    elapsed_time = (datetime.now() - start_time).total_seconds()
     fps = num_frames / elapsed_time
     print("fps", fps)
     pool.terminate()

@@ -1,15 +1,15 @@
 # Utilities for object detector.
 
-import numpy as np
 import sys
-import tensorflow as tf
+import cv2
 import os
+import numpy as np
+import tensorflow as tf
 from threading import Thread
 from datetime import datetime
-import cv2
 from utils import label_map_util
 from collections import defaultdict
-
+from utils import circle
 
 detection_graph = tf.Graph()
 sys.path.append("..")
@@ -66,12 +66,6 @@ def draw_box_on_image(num_hands_detect, score_thresh, scores, boxes, im_width, i
 def draw_fps_on_image(fps, image_np):
     cv2.putText(image_np, fps, (20, 50),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.75, (255, 255, 255), 2)
-
-def draw_music_bars_on_image(music_bars, image_np):
-    for bar in music_bars:
-        # left top + 20 right top
-        # image, center x[0], radius, color x[1], thickness
-        cv2.circle(image_np, bar[0], 40, bar[1], -1)
 
 # Practice line
 def draw_base_lines_on_image(x, y, image_np):
