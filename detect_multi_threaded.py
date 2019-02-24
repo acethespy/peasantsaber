@@ -13,6 +13,8 @@ frame_processed = 0
 score_thresh = 0.2
 
 point = None;
+manager = None;
+crossed = False;
 
 def aboveThreshhold(pointA, height):
     return pointA[1] < height*2/3;
@@ -20,8 +22,7 @@ def aboveThreshhold(pointA, height):
 # Create a worker thread that loads graph and
 # does detection on images in an input queue and puts it on an output queue
 
-def worker(input_q, output_q, cap_params, frame_processed):
-    global point
+def worker(input_q, output_q, cap_params, frame_processed, points):
     print(">> loading frozen model for worker")
     detection_graph, sess = detector_utils.load_inference_graph()
     sess = tf.Session(graph=detection_graph)
@@ -44,20 +45,37 @@ def worker(input_q, output_q, cap_params, frame_processed):
             point = detectedPoint
 
             if detectedPoint is not None:
-                print(detectedPoint)
+                #print(detectedPoint)
                 if prevPoint is not None:
                     if aboveThreshhold(prevPoint, cap_params["im_height"]) and not aboveThreshhold(detectedPoint, cap_params["im_height"]):
                         print("Detected: " + str(detectedPoint) + "Prev: " + str(prevPoint))
                         print("Under")
+                        points.put(detectedPoint);
+                    #else:
+                        #points.put((-1, -1))
+                        #callHits.get()(detectedPoint[0], cap_params["im_height"], cap_params["im_width"])
                         #call circle collision thing
+                #else:
+                    #points.put((-1, -1))
+
                 prevPoint = detectedPoint
+            #else:
+                #points.put((-1, -1))
             # add frame annotated with bounding box to queue
             output_q.put(frame)
             frame_processed += 1
         else:
+            #points.put((-1, -1))
             output_q.put(frame)
     sess.close()
 
+def get_all_queue_result(queue):
+
+    result_list = []
+    while not queue.empty():
+        result_list.append(queue.get())
+
+    return result_list
 
 if __name__ == '__main__':
 
@@ -137,25 +155,79 @@ if __name__ == '__main__':
     print(cap_params, args)
 
     # spin up workers to paralleize detection.
+
+    manager = circlemanager.CircleManager(cv2)
+
+    #not needed begins
+    def callHit(x, height, width):
+        manager.hit(x, height, width)
+    #not needed ends
+    points = Queue(maxsize=args.queue_size)
+
     pool = Pool(args.num_workers, worker,
-                (input_q, output_q, cap_params, frame_processed))
+                (input_q, output_q, cap_params, frame_processed, points))
+
 
     start_time = datetime.now()
-    manager = circlemanager.CircleManager(cv2)
     manager.createDefaultCircle(cap_params['im_width'], cap_params['im_height'])
     num_frames = 0
     fps = 0
     index = 0
 
+    #Differ begins
+    """
+    detection_graph, sess = detector_utils.load_inference_graph()
+    sess = tf.Session(graph=detection_graph)
+    prevPoint = None;"""
+    #Differ ends
+
     cv2.namedWindow('Multi-Threaded Detection', cv2.WINDOW_NORMAL)
 
+
     while True:
+
+        #Differ begins
+
+        """frame = input_q.get()
+        if (frame is not None):
+            # Actual detection. Variable boxes contains the bounding box cordinates for hands detected,
+            # while scores contains the confidence for each of these boxes.
+            # Hint: If len(boxes) > 1 , you may assume you have found atleast one hand (within your score threshold)
+
+            boxes, scores = detector_utils.detect_objects(
+                frame, detection_graph, sess)
+            # draw bounding boxes
+            detectedPoint = detector_utils.draw_box_on_image(
+                cap_params['num_hands_detect'], cap_params["score_thresh"],
+                scores, boxes, cap_params['im_width'], cap_params['im_height'],
+                frame)
+            point = detectedPoint
+
+            if detectedPoint is not None:
+                print(detectedPoint)
+                if prevPoint is not None:
+                    if aboveThreshhold(prevPoint, cap_params["im_height"]) and not aboveThreshhold(detectedPoint, cap_params["im_height"]):
+                        print("Detected: " + str(detectedPoint) + "Prev: " + str(prevPoint))
+                        print("Under")
+                        manager.hit(detectedPoint[0], cap_params["im_height"], cap_params["im_width"])
+                        #call circle collision thing
+                prevPoint = detectedPoint
+            # add frame annotated with bounding box to queue
+            output_q.put(frame)
+            frame_processed += 1
+        else:
+            output_q.put(frame)"""
+
+        #Differ ends
+
+
         frame = video_capture.read()
         frame = cv2.flip(frame, 1)
         index += 1
 
         input_q.put(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
         output_frame = output_q.get()
+        ##print(points.get())
 
         output_frame = cv2.cvtColor(output_frame, cv2.COLOR_RGB2BGR)
 
@@ -165,8 +237,9 @@ if __name__ == '__main__':
         # print("frame ",  index, num_frames, elapsed_time, fps)
 
         if (output_frame is not None):
+            pointsList = get_all_queue_result(points)
             detector_utils.draw_base_lines_on_image((int)(cap_params["im_width"]), (int)(cap_params["im_height"]), output_frame)
-            manager.update((int)(cap_params["im_width"]), (int)(cap_params["im_height"]), output_frame)
+            manager.update((int)(cap_params["im_width"]), (int)(cap_params["im_height"]), output_frame, pointsList)
 
             if (args.display > 0):
                 if (args.fps > 0):
