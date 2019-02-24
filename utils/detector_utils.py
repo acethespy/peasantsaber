@@ -48,7 +48,7 @@ def load_inference_graph():
     return detection_graph, sess
 
 
-# draw the detected bounding boxes on the images
+# Draw the detected bounding boxes on the images
 # You can modify this to also draw a label.
 def draw_box_on_image(num_hands_detect, score_thresh, scores, boxes, im_width, im_height, image_np):
     for i in range(num_hands_detect):
@@ -57,14 +57,35 @@ def draw_box_on_image(num_hands_detect, score_thresh, scores, boxes, im_width, i
                                           boxes[i][0] * im_height, boxes[i][2] * im_height)
             p1 = (int(left), int(top))
             p2 = (int(right), int(bottom))
-            cv2.rectangle(image_np, p1, p2, (77, 255, 9), 3, 1)
+            cv2.rectangle(image_np, p1, p2, (255, 255, 255), 3, 1)
+            # Left top corner, right bottom corner
+            print("Testing: " + str(left) + "," + str(top) + " " + str(right) + "," + str(bottom))
 
 
 # Show fps value on image.
 def draw_fps_on_image(fps, image_np):
     cv2.putText(image_np, fps, (20, 50),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.75, (77, 255, 9), 2)
+                cv2.FONT_HERSHEY_SIMPLEX, 0.75, (255, 255, 255), 2)
 
+def draw_music_bars_on_image(music_bars, image_np):
+    for bar in music_bars:
+        # left top + 20 right top
+        # image, center x[0], radius, color x[1], thickness
+        cv2.circle(image_np, bar[0], 40, bar[1], -1)
+
+# Practice line
+def draw_base_lines_on_image(x, y, image_np):
+    # Horizontal line
+    color = (0, 0, 0)
+    initialX = (int)(x / 4)
+    thirdOfY = (int)(3 * y / 4)
+
+    cv2.line(image_np, (0, thirdOfY), (x, thirdOfY), color, 5)
+
+    # Vertical lines
+    cv2.line(image_np, (initialX, thirdOfY), (initialX, y), color, 5)
+    cv2.line(image_np, (initialX * 2, thirdOfY), (initialX * 2, y), color, 5)
+    cv2.line(image_np, (initialX * 3, thirdOfY), (initialX * 3, y), color, 5)
 
 # Actual detection .. generate scores and bounding boxes given an image
 def detect_objects(image_np, detection_graph, sess):
