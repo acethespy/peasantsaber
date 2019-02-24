@@ -11,7 +11,10 @@ import argparse
 frame_processed = 0
 score_thresh = 0.2
 
-boxes = []
+point = None;
+
+def aboveThreshhold(point, height):
+    return point[1] < height/4;
 
 # Create a worker thread that loads graph and
 # does detection on images in an input queue and puts it on an output queue
@@ -31,10 +34,16 @@ def worker(input_q, output_q, cap_params, frame_processed):
             boxes, scores = detector_utils.detect_objects(
                 frame, detection_graph, sess)
             # draw bounding boxes
-            detector_utils.draw_box_on_image(
+            detectedPoint = detector_utils.draw_box_on_image(
                 cap_params['num_hands_detect'], cap_params["score_thresh"],
                 scores, boxes, cap_params['im_width'], cap_params['im_height'],
                 frame)
+
+            if detectedPoint is not None:
+                if aboveThreshhold(point, cap_params["im_height"]) and not aboveThreshhold(detectedPoint, cap_params["im_height"]):
+                    #call circle collision thing
+                point = detectedPoint
+
             # add frame annotated with bounding box to queue
             output_q.put(frame)
             frame_processed += 1
