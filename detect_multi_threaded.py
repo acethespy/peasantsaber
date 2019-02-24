@@ -7,6 +7,7 @@ import time
 from utils.detector_utils import WebcamVideoStream
 from datetime import datetime
 import argparse
+from utils import circlemanager
 
 frame_processed = 0
 score_thresh = 0.2
@@ -134,8 +135,8 @@ if __name__ == '__main__':
                 (input_q, output_q, cap_params, frame_processed))
 
     start_time = datetime.now()
-    manager = CircleManager()
-    manager.createDefaultCircle(cap_params['im_width'])
+    manager = circlemanager.CircleManager(cv2)
+    manager.createDefaultCircle(cap_params['im_width'], cap_params['im_height'])
     num_frames = 0
     fps = 0
     index = 0
@@ -159,7 +160,6 @@ if __name__ == '__main__':
 
         if (output_frame is not None):
             detector_utils.draw_base_lines_on_image((int)(cap_params["im_width"]), (int)(cap_params["im_height"]), output_frame)
-            detector_utils.draw_music_bars_on_image(music_bars, output_frame)
             manager.drawCircles(output_frame)
 
             if (args.display > 0):

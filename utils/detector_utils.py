@@ -9,7 +9,7 @@ from threading import Thread
 from datetime import datetime
 from utils import label_map_util
 from collections import defaultdict
-from utils import circle
+from utils import circlemanager
 
 detection_graph = tf.Graph()
 sys.path.append("..")
